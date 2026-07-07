@@ -30,17 +30,23 @@ export function useWebSocket() {
   const getWebSocketUrl = useCallback(() => {
     if (typeof window === 'undefined') return null;
 
-    // Use environment variable or derive from page URL
+    // Use environment variable if explicitly set
     const wsUrl = process.env.NEXT_PUBLIC_WS_URL;
-    if (wsUrl) {
-      // Convert http(s) to ws(s)
-      return wsUrl.replace(/^http/, 'ws') + '/ws';
+    if (wsUrl && !wsUrl.includes('localhost')) {
+      let url = wsUrl.replace(/^http/, 'ws');
+      if (!url.endsWith('/ws')) {
+        url = url.replace(/\/+$/, '') + '/ws';
+      }
+      return url;
     }
 
-    // Default: connect to same host on port 8765
+    // Default intelligent routing:
     const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
     const host = window.location.hostname;
-    return `${protocol}//${host}:8765/ws`;
+    // If accessing via Next.js dev port (3000), connect directly to bot port 8765.
+    // Otherwise (production via Nginx on port 80/443), connect through Nginx (/ws).
+    const port = window.location.port === '3000' ? ':8765' : (window.location.port ? `:${window.location.port}` : '');
+    return `${protocol}//${host}${port}/ws`;
   }, []);
 
   const handleMessage = useCallback((event) => {
