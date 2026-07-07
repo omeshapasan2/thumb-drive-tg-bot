@@ -59,7 +59,7 @@ async def list_remote_files(remote: str, path: str) -> list[dict]:
     Returns a list of dicts with 'name', 'size', 'path' keys.
     """
     remote_path = f"{remote}:{path}"
-    cmd = f"rclone lsjson {shlex.quote(remote_path)} --no-modtime --no-mimetype"
+    cmd = f"rclone lsjson {shlex.quote(remote_path)} --fast-list --no-modtime --no-mimetype"
     stdout, stderr, rc = await run_subprocess(cmd)
 
     if rc != 0:
