@@ -44,3 +44,5 @@ thumbnails/
 logs.txt
 reference.md
 .env.example
+.env.example
+docker-compose.yml

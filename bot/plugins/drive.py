@@ -126,12 +126,16 @@ async def process_command(client: Client, message: Message):
         )
         return
 
-    # Build the file list message
+    # Build the file list message (limit to 15 files to avoid Telegram 4096 char limit)
     total_size = sum(f["size"] for f in files)
-    file_list = "\n".join(
+    max_display = 15
+    file_list_lines = [
         f"  {i+1}. `{f['name']}` — {format_file_size(f['size'])}"
-        for i, f in enumerate(files)
-    )
+        for i, f in enumerate(files[:max_display])
+    ]
+    if len(files) > max_display:
+        file_list_lines.append(f"  ... and {len(files) - max_display} more video(s)")
+    file_list = "\n".join(file_list_lines)
 
     await status_msg.edit_text(
         f"📁 **Found {len(files)} video(s)** in `{remote}:{path}`\n"
