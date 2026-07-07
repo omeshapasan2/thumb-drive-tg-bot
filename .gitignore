@@ -1,0 +1,45 @@
+# Dependencies
+node_modules/
+
+# Next.js
+.next/
+out/
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+*.egg
+.venv/
+venv/
+
+# Environment
+.env
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Docker
+docker-compose.override.yml
+
+# Downloads (runtime data)
+downloads/
+thumbnails/
+
+# Pyrogram session files
+*.session
+*.session-journal
+
+# Logs
+*.log
+logs.txt
+reference.md

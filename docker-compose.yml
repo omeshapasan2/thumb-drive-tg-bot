@@ -1,0 +1,121 @@
+version: '3.8'
+
+# ============================================================
+# Video Thumbnail Generator Bot — Docker Compose
+# ============================================================
+# Services:
+#   1. telegram-bot-api  — Local Bot API Server (optional, for
+#      other tools that use the HTTP Bot API)
+#   2. bot               — Python bot (Pyrogram MTProto) +
+#                          FastAPI WebSocket server
+#   3. dashboard         — Next.js Mini App frontend
+#
+# NOTE: Pyrogram uses the MTProto protocol and connects directly
+# to Telegram servers. It already supports files up to 2GB
+# without needing a local Bot API server. The telegram-bot-api
+# service is included as an optional convenience.
+# ============================================================
+
+services:
+  # --------------------------------------------------------
+  # Local Telegram Bot API Server (Optional)
+  # Useful if you need to interact with the Bot API directly
+  # from other tools or scripts. Pyrogram does NOT need this.
+  # --------------------------------------------------------
+  telegram-bot-api:
+    image: aiogram/telegram-bot-api:latest
+    container_name: tg-bot-api
+    restart: unless-stopped
+    profiles:
+      - with-bot-api  # Only starts with: docker-compose --profile with-bot-api up
+    environment:
+      TELEGRAM_API_ID: ${API_ID}
+      TELEGRAM_API_HASH: ${API_HASH}
+      TELEGRAM_LOCAL: "true"
+    ports:
+      - "8081:8081"
+    volumes:
+      - bot-api-data:/var/lib/telegram-bot-api
+    networks:
+      - bot-network
+
+  # --------------------------------------------------------
+  # Python Bot Backend
+  # Pyrogram (MTProto) + FastAPI WebSocket server
+  # Handles all video processing logic
+  # --------------------------------------------------------
+  bot:
+    build:
+      context: ./bot
+      dockerfile: Dockerfile
+    container_name: tg-bot
+    restart: unless-stopped
+    environment:
+      # Telegram credentials
+      API_ID: ${API_ID}
+      API_HASH: ${API_HASH}
+      BOT_TOKEN: ${BOT_TOKEN}
+      # rclone configuration
+      RCLONE_REMOTE: ${RCLONE_REMOTE:-gdrive}
+      RCLONE_PATH: ${RCLONE_PATH:-/}
+      # File paths inside container
+      BASE_DIR: /app
+      DOWNLOAD_DIR: /app/downloads
+      THUMBNAIL_DIR: /app/thumbnails
+      # WebSocket server port
+      WS_PORT: "8765"
+      # Web App URL (for the inline button)
+      WEBAPP_URL: ${WEBAPP_URL:-https://your-domain.com}
+      # RAM monitoring thresholds
+      RAM_THRESHOLD_PERCENT: ${RAM_THRESHOLD_PERCENT:-85}
+      RAM_CRITICAL_PERCENT: ${RAM_CRITICAL_PERCENT:-95}
+      # Authorized users (space-separated, 0 = public)
+      AUTH_USERS: ${AUTH_USERS:-0}
+    volumes:
+      # Mount rclone config from host
+      - ${RCLONE_CONFIG_PATH:-~/.config/rclone}:/root/.config/rclone:ro
+      # Persistent download directory
+      - downloads:/app/downloads
+      - thumbnails:/app/thumbnails
+    ports:
+      - "8765:8765"
+    networks:
+      - bot-network
+
+  # --------------------------------------------------------
+  # Next.js Dashboard (Mini App)
+  # Real-time monitoring interface accessible via Telegram
+  # --------------------------------------------------------
+  dashboard:
+    build:
+      context: ./dashboard
+      dockerfile: Dockerfile
+    container_name: tg-dashboard
+    restart: unless-stopped
+    depends_on:
+      - bot
+    environment:
+      NEXT_PUBLIC_WS_URL: ${NEXT_PUBLIC_WS_URL:-http://bot:8765}
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://bot:8765}
+    ports:
+      - "3000:3000"
+    networks:
+      - bot-network
+
+# --------------------------------------------------------
+# Volumes
+# --------------------------------------------------------
+volumes:
+  bot-api-data:
+    driver: local
+  downloads:
+    driver: local
+  thumbnails:
+    driver: local
+
+# --------------------------------------------------------
+# Networks
+# --------------------------------------------------------
+networks:
+  bot-network:
+    driver: bridge
