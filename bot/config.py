@@ -33,7 +33,7 @@ class Config:
     WS_PORT: int = int(os.getenv("WS_PORT", "8765"))
 
     # --- Target Channel for uploads (optional: channel username or ID e.g. @mychannel or -1001234567890) ---
-    TARGET_CHANNEL: str = os.getenv("TARGET_CHANNEL", "").strip()
+    TARGET_CHANNEL: str = os.getenv("TARGET_CHANNEL", "").strip().strip('"').strip("'")
 
     # --- RAM monitoring ---
     RAM_THRESHOLD_PERCENT: int = int(os.getenv("RAM_THRESHOLD_PERCENT", "85"))
