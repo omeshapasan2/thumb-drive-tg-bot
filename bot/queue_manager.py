@@ -44,6 +44,7 @@ class VideoTask:
     status: VideoStatus = VideoStatus.PENDING
     progress: float = 0.0  # 0-100
     error: str = ""
+    speed: str = ""  # e.g. "12.5 MB/s"
     added_at: float = field(default_factory=time.time)
     started_at: Optional[float] = None
     completed_at: Optional[float] = None
@@ -58,6 +59,7 @@ class VideoTask:
             "status": self.status.value,
             "progress": self.progress,
             "error": self.error,
+            "speed": self.speed,
             "added_at": self.added_at,
             "started_at": self.started_at,
             "completed_at": self.completed_at,
@@ -157,10 +159,14 @@ class VideoQueue:
             return None
 
     async def update_task_status(
-        self, status: VideoStatus, progress: float = 0.0, error: str = ""
+        self, status: VideoStatus, progress: float = 0.0, error: str = "", speed: Optional[str] = None
     ) -> None:
         """Update the status of the currently processing task."""
         if self._current_task:
+            if self._current_task.status != status:
+                self._current_task.speed = speed if speed is not None else ""
+            elif speed is not None:
+                self._current_task.speed = speed
             self._current_task.status = status
             self._current_task.progress = progress
             self._current_task.error = error

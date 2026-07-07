@@ -8,6 +8,7 @@ All file paths use pathlib.Path with absolute resolution.
 
 import asyncio
 import logging
+import re
 import shlex
 import shutil
 import time
@@ -131,8 +132,13 @@ async def download_video(task: VideoTask) -> Path:
 
         line_str = line.decode("utf-8", errors="replace").strip()
         if line_str:
-            # Try to parse progress percentage from rclone output
-            # rclone progress looks like: "Transferred: ... 45%, ..."
+            # Try to parse progress percentage and speed from rclone output
+            # rclone progress looks like: "Transferred: ... 45%, 48.410 MiB/s, ..."
+            speed_str = ""
+            speed_match = re.search(r'([0-9.]+\s*[kKmMgGtT]?[iI]?[bB]/s)', line_str)
+            if speed_match:
+                speed_str = speed_match.group(1)
+
             if "%" in line_str:
                 try:
                     parts = line_str.split("%")
@@ -143,7 +149,7 @@ async def download_video(task: VideoTask) -> Path:
                             pct = float(last)
                             if 0 <= pct <= 100:
                                 await video_queue.update_task_status(
-                                    VideoStatus.DOWNLOADING, progress=pct
+                                    VideoStatus.DOWNLOADING, progress=pct, speed=speed_str
                                 )
                                 break
                 except (ValueError, IndexError):
@@ -303,16 +309,28 @@ async def upload_to_telegram(
 
     last_update_time = [0.0]
     last_pct = [-1.0]
+    last_bytes = [0]
 
     async def upload_progress(current: int, total: int):
         if total == 0:
             return
         now = time.time()
         pct = min(round((current / total) * 100, 1), 99.0)
-        if now - last_update_time[0] >= 1.0 or pct == 99.0 or abs(pct - last_pct[0]) >= 2.0:
+        time_diff = now - last_update_time[0]
+        if time_diff >= 1.0 or pct == 99.0 or abs(pct - last_pct[0]) >= 2.0:
+            bytes_diff = current - last_bytes[0]
+            speed_bps = bytes_diff / time_diff if time_diff > 0 else 0
+            if speed_bps >= 1024 * 1024:
+                speed_str = f"{speed_bps / (1024 * 1024):.2f} MB/s"
+            elif speed_bps >= 1024:
+                speed_str = f"{speed_bps / 1024:.1f} KB/s"
+            else:
+                speed_str = f"{speed_bps:.0f} B/s"
+
             last_update_time[0] = now
             last_pct[0] = pct
-            await video_queue.update_task_status(VideoStatus.UPLOADING, progress=pct)
+            last_bytes[0] = current
+            await video_queue.update_task_status(VideoStatus.UPLOADING, progress=pct, speed=speed_str)
 
     video_msg = await bot_client.send_video(
         chat_id=chat_id,

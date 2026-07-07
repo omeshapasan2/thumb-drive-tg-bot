@@ -25,20 +25,29 @@ export default function RamMonitor({ ram }) {
   }[status] || '🟢';
 
   return (
-    <div className="ram-monitor" id="ram-monitor">
-      <div className="ram-monitor__icon">{emoji}</div>
-      <div className="ram-monitor__info">
-        <div className="ram-monitor__label">
-          RAM — {(ram.available_mb || 0).toFixed(0)} MB free
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+      <div className="ram-monitor" id="ram-monitor">
+        <div className="ram-monitor__icon">{emoji}</div>
+        <div className="ram-monitor__info">
+          <div className="ram-monitor__label">
+            RAM — {(ram.available_mb || 0).toFixed(0)} MB free
+          </div>
+          <div className="ram-monitor__bar-container">
+            <div
+              className={`ram-monitor__bar ${barClass}`}
+              style={{ width: `${Math.min(percent, 100)}%` }}
+            />
+          </div>
         </div>
-        <div className="ram-monitor__bar-container">
-          <div
-            className={`ram-monitor__bar ${barClass}`}
-            style={{ width: `${Math.min(percent, 100)}%` }}
-          />
-        </div>
+        <div className="ram-monitor__value">{percent.toFixed(0)}%</div>
       </div>
-      <div className="ram-monitor__value">{percent.toFixed(0)}%</div>
+
+      {ram.net && (
+        <div className="ram-monitor" style={{ display: 'flex', justifyContent: 'space-around', fontSize: '0.85rem', padding: '8px 16px' }}>
+          <span>📥 Down: <strong style={{ color: 'var(--accent-blue)' }}>{ram.net.download_speed}</strong></span>
+          <span>📤 Up: <strong style={{ color: 'var(--accent-blue)' }}>{ram.net.upload_speed}</strong></span>
+        </div>
+      )}
     </div>
   );
 }

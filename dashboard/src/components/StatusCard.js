@@ -4,7 +4,7 @@
  * StatusCard — displays the currently processing video with
  * animated status indicator, file info, and phase badge.
  */
-export default function StatusCard({ currentTask, state }) {
+export default function StatusCard({ currentTask, state, ram }) {
   if (!currentTask || state === 'idle') {
     return (
       <div className={`card status-card status-card--idle`} id="status-card">
@@ -59,6 +59,15 @@ export default function StatusCard({ currentTask, state }) {
   const phase = phaseConfig[currentTask.status] || phaseConfig.pending;
   const progress = Math.min(Math.max(currentTask.progress || 0, 0), 100);
 
+  let displaySpeed = currentTask.speed || '';
+  if (ram?.net) {
+    if (currentTask.status === 'downloading' && ram.net.recv_bps > 0) {
+      displaySpeed = ram.net.download_speed;
+    } else if (currentTask.status === 'uploading' && ram.net.sent_bps > 0) {
+      displaySpeed = ram.net.upload_speed;
+    }
+  }
+
   return (
     <div className="card status-card status-card--processing" id="status-card">
       <div className="card__header">
@@ -74,6 +83,9 @@ export default function StatusCard({ currentTask, state }) {
 
       <div className="status-details">
         <span>📦 {currentTask.file_size_human || '—'}</span>
+        {displaySpeed && (
+          <span style={{ color: 'var(--accent-blue)', fontWeight: 600 }}>⚡ {displaySpeed}</span>
+        )}
         {currentTask.status === 'generating_thumbnails' && (
           <span>📸 3 thumbnails</span>
         )}
@@ -87,7 +99,7 @@ export default function StatusCard({ currentTask, state }) {
           />
         </div>
         <div className="progress__label">
-          <span>{phase.label}</span>
+          <span>{phase.label} {displaySpeed ? `— ⚡ ${displaySpeed}` : ''}</span>
           <span className="progress__percent">{progress.toFixed(1)}%</span>
         </div>
       </div>

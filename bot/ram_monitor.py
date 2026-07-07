@@ -90,8 +90,56 @@ def emergency_cleanup(thumbnail_dir: Path) -> None:
     )
 
 
+import time
+
+_last_net_io = [None]
+_last_net_time = [0.0]
+
+
+def get_network_speed() -> dict:
+    """Get container network download and upload speeds (in bytes/sec and formatted strings)."""
+    now = time.time()
+    try:
+        net_io = psutil.net_io_counters()
+    except Exception:
+        return {"download_speed": "0 B/s", "upload_speed": "0 B/s", "recv_bps": 0, "sent_bps": 0}
+
+    if _last_net_io[0] is None or _last_net_time[0] == 0.0:
+        _last_net_io[0] = net_io
+        _last_net_time[0] = now
+        return {"download_speed": "0 B/s", "upload_speed": "0 B/s", "recv_bps": 0, "sent_bps": 0}
+
+    time_diff = now - _last_net_time[0]
+    if time_diff < 0.5:
+        time_diff = 0.5
+
+    recv_diff = max(0, net_io.bytes_recv - _last_net_io[0].bytes_recv)
+    sent_diff = max(0, net_io.bytes_sent - _last_net_io[0].bytes_sent)
+
+    _last_net_io[0] = net_io
+    _last_net_time[0] = now
+
+    recv_bps = recv_diff / time_diff
+    sent_bps = sent_diff / time_diff
+
+    def format_speed(bps: float) -> str:
+        if bps >= 1024 * 1024:
+            return f"{bps / (1024 * 1024):.2f} MB/s"
+        elif bps >= 1024:
+            return f"{bps / 1024:.1f} KB/s"
+        else:
+            return f"{bps:.0f} B/s"
+
+    return {
+        "download_speed": format_speed(recv_bps),
+        "upload_speed": format_speed(sent_bps),
+        "recv_bps": round(recv_bps),
+        "sent_bps": round(sent_bps),
+    }
+
+
 def log_ram_status() -> dict:
-    """Log and return current RAM status for monitoring."""
+    """Log and return current RAM status and container network speed for monitoring."""
     usage = get_ram_usage()
     status = "OK"
     if usage["percent"] >= Config.RAM_CRITICAL_PERCENT:
@@ -107,4 +155,4 @@ def log_ram_status() -> dict:
         usage["total_mb"],
         usage["available_mb"],
     )
-    return {**usage, "status": status}
+    return {**usage, "status": status, "net": get_network_speed()}

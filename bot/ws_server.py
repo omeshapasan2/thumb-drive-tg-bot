@@ -65,6 +65,17 @@ async def broadcast_state() -> None:
 video_queue.set_state_callback(broadcast_state)
 
 
+@app.on_event("startup")
+async def start_periodic_broadcast():
+    """Periodically broadcast container RAM and network speed updates every 1 second."""
+    async def periodic():
+        while True:
+            await asyncio.sleep(1.0)
+            if connected_clients:
+                await broadcast_state()
+    asyncio.create_task(periodic())
+
+
 # --- WebSocket Endpoint ---
 @app.websocket("/ws")
 async def websocket_endpoint(ws: WebSocket):

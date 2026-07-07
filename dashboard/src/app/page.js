@@ -61,6 +61,7 @@ export default function DashboardPage() {
         <StatusCard
           currentTask={status?.current_task || null}
           state={status?.state || 'idle'}
+          ram={ram}
         />
       </section>
 
