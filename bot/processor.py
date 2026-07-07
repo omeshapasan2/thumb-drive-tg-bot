@@ -88,8 +88,8 @@ async def list_remote_files(remote: str, path: str) -> list[dict]:
                 "path": f"{path}/{name}".replace("//", "/"),
             })
 
-    # Sort by file size descending (largest first -> smallest last)
-    video_files.sort(key=lambda x: x["size"], reverse=True)
+    # Sort by file size ascending (smallest first -> largest last)
+    video_files.sort(key=lambda x: x["size"])
     return video_files
 
 

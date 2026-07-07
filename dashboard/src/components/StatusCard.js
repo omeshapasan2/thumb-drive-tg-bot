@@ -99,7 +99,7 @@ export default function StatusCard({ currentTask, state, ram }) {
           />
         </div>
         <div className="progress__label">
-          <span>{phase.label} {displaySpeed ? `— ⚡ ${displaySpeed}` : ''}</span>
+          <span>{phase.label}</span>
           <span className="progress__percent">{progress.toFixed(1)}%</span>
         </div>
       </div>
