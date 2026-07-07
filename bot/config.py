@@ -32,6 +32,9 @@ class Config:
     WEBAPP_URL: str = os.getenv("WEBAPP_URL", "https://your-domain.com")
     WS_PORT: int = int(os.getenv("WS_PORT", "8765"))
 
+    # --- Target Channel for uploads (optional: channel username or ID e.g. @mychannel or -1001234567890) ---
+    TARGET_CHANNEL: str = os.getenv("TARGET_CHANNEL", "").strip()
+
     # --- RAM monitoring ---
     RAM_THRESHOLD_PERCENT: int = int(os.getenv("RAM_THRESHOLD_PERCENT", "85"))
     RAM_CRITICAL_PERCENT: int = int(os.getenv("RAM_CRITICAL_PERCENT", "95"))

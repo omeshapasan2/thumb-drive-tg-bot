@@ -286,6 +286,12 @@ async def upload_to_telegram(
 
     await video_queue.update_task_status(VideoStatus.UPLOADING, progress=0.0)
 
+    # Determine upload destination: use TARGET_CHANNEL if configured, otherwise default to chat_id
+    dest_chat = chat_id
+    if Config.TARGET_CHANNEL:
+        dest_chat = int(Config.TARGET_CHANNEL) if Config.TARGET_CHANNEL.lstrip("-").isdigit() else Config.TARGET_CHANNEL
+        logger.info("Uploading to target channel: %s", dest_chat)
+
     # Generate a small thumbnail for the video message itself
     video_thumb = Config.THUMBNAIL_DIR / f"{video_path.stem}_video_thumb.jpg"
     cmd = (
@@ -304,7 +310,7 @@ async def upload_to_telegram(
         duration = 0
 
     # Send the video file
-    logger.info("Uploading video: %s", video_path.name)
+    logger.info("Uploading video: %s -> %s", video_path.name, dest_chat)
     thumb_arg = str(video_thumb) if video_thumb.exists() else None
 
     last_update_time = [0.0]
@@ -333,7 +339,7 @@ async def upload_to_telegram(
             await video_queue.update_task_status(VideoStatus.UPLOADING, progress=pct, speed=speed_str)
 
     video_msg = await bot_client.send_video(
-        chat_id=chat_id,
+        chat_id=dest_chat,
         video=str(video_path),
         caption=f"📹 **{video_path.name}**\n📦 Size: {format_file_size(video_path.stat().st_size)}",
         duration=duration,
@@ -356,12 +362,21 @@ async def upload_to_telegram(
                 )
             )
 
-        logger.info("Uploading %d thumbnails as media group", len(media_group))
+        logger.info("Uploading %d thumbnails as media group to %s", len(media_group), dest_chat)
         await bot_client.send_media_group(
-            chat_id=chat_id,
+            chat_id=dest_chat,
             media=media_group,
             reply_to_message_id=video_msg.id,
         )
+
+    if dest_chat != chat_id:
+        try:
+            await bot_client.send_message(
+                chat_id=chat_id,
+                text=f"✅ Uploaded `{video_path.name}` to channel!"
+            )
+        except Exception:
+            pass
 
     await video_queue.update_task_status(VideoStatus.UPLOADING, progress=100.0)
     logger.info("Upload complete for: %s", video_path.name)
