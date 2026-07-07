@@ -10,11 +10,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
     unzip \
     ca-certificates \
-    && curl -O https://downloads.rclone.org/current/rclone-current-linux-amd64.zip \
-    && unzip rclone-current-linux-amd64.zip \
+    && curl -fSL https://downloads.rclone.org/current/rclone-current-linux-amd64.zip -o rclone.zip \
+    && unzip rclone.zip \
     && cp rclone-*-linux-amd64/rclone /usr/bin/ \
     && chmod 755 /usr/bin/rclone \
-    && rm -rf rclone-* \
+    && rm -rf rclone-* rclone.zip \
     && apt-get purge -y curl unzip \
     && apt-get autoremove -y \
     && rm -rf /var/lib/apt/lists/*
