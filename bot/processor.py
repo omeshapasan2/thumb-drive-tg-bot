@@ -383,6 +383,21 @@ async def process_single_video(bot_client, chat_id: int, task: VideoTask) -> boo
     thumbnail_paths: list[Path] = []
 
     try:
+        # Step 0: Check file size against Telegram 2000 MiB limit (2000 * 1024 * 1024 bytes)
+        max_size_bytes = 2000 * 1024 * 1024
+        if task.file_size > max_size_bytes:
+            error_msg = f"Can't upload files bigger than 2000 MiB (File size: {task.file_size_human})"
+            logger.warning("Skipping %s: %s", task.filename, error_msg)
+            await video_queue.complete_current_task(success=False, error=error_msg)
+            try:
+                await bot_client.send_message(
+                    chat_id=chat_id,
+                    text=f"⚠️ **Skipped:** `{task.filename}`\n**Reason:** {error_msg}",
+                )
+            except Exception:
+                pass
+            return False
+
         # Step 1: Download
         video_path = await download_video(task)
 
