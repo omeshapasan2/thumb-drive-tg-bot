@@ -43,3 +43,4 @@ thumbnails/
 *.log
 logs.txt
 reference.md
+.env.example
