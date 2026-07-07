@@ -286,10 +286,10 @@ async def upload_to_telegram(
 
     await video_queue.update_task_status(VideoStatus.UPLOADING, progress=0.0)
 
-    # Determine upload destination: use TARGET_CHANNEL if configured, otherwise default to chat_id
+    # Determine upload destination: use CHANNEL_ID (or TARGET_CHANNEL) if configured, otherwise default to chat_id
     dest_chat = chat_id
-    if Config.TARGET_CHANNEL:
-        dest_chat = int(Config.TARGET_CHANNEL) if Config.TARGET_CHANNEL.lstrip("-").isdigit() else Config.TARGET_CHANNEL
+    if Config.CHANNEL_ID:
+        dest_chat = int(Config.CHANNEL_ID) if Config.CHANNEL_ID.lstrip("-").isdigit() else Config.CHANNEL_ID
         logger.info("Uploading to target channel: %s", dest_chat)
 
     # Generate a small thumbnail for the video message itself
