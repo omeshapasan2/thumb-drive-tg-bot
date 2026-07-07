@@ -10,6 +10,7 @@ import asyncio
 import logging
 import shlex
 import shutil
+import time
 from pathlib import Path
 from typing import Optional
 
@@ -300,6 +301,19 @@ async def upload_to_telegram(
     logger.info("Uploading video: %s", video_path.name)
     thumb_arg = str(video_thumb) if video_thumb.exists() else None
 
+    last_update_time = [0.0]
+    last_pct = [-1.0]
+
+    async def upload_progress(current: int, total: int):
+        if total == 0:
+            return
+        now = time.time()
+        pct = min(round((current / total) * 100, 1), 99.0)
+        if now - last_update_time[0] >= 1.0 or pct == 99.0 or abs(pct - last_pct[0]) >= 2.0:
+            last_update_time[0] = now
+            last_pct[0] = pct
+            await video_queue.update_task_status(VideoStatus.UPLOADING, progress=pct)
+
     video_msg = await bot_client.send_video(
         chat_id=chat_id,
         video=str(video_path),
@@ -307,9 +321,10 @@ async def upload_to_telegram(
         duration=duration,
         thumb=thumb_arg,
         supports_streaming=True,
+        progress=upload_progress,
     )
 
-    await video_queue.update_task_status(VideoStatus.UPLOADING, progress=50.0)
+    await video_queue.update_task_status(VideoStatus.UPLOADING, progress=99.0)
 
     # Send thumbnails as a media group (reply to the video)
     if thumbnail_paths:
