@@ -29,7 +29,7 @@ A complete Telegram Bot + Mini App Dashboard that processes videos from Google D
 - **Google Drive Integration** — select rclone remote and drive folder path
 - **Sequential Processing** — strict one-at-a-time pipeline prevents memory spikes
 - **3 Thumbnails Per Video** — evenly spaced at 25%, 50%, 75% of duration
-- **Large File Support** — uploads via Local Bot API Server (no 50MB limit)
+- **Large File Support** — uploads via Local Bot API Server (no 20MB limit)
 - **Real-time Dashboard** — Telegram Mini App with WebSocket-powered live updates
 - **RAM Monitoring** — auto-pauses when memory is low, emergency cleanup on critical
 - **Robust Paths** — all file operations use `pathlib.Path` with absolute resolution
