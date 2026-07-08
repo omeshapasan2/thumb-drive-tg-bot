@@ -84,7 +84,7 @@ export default function StatusCard({ currentTask, state, ram }) {
       <div className="status-details">
         <span>📦 {currentTask.file_size_human || '—'}</span>
         {displaySpeed && (
-          <span style={{ color: 'var(--accent-blue)', fontWeight: 600 }}>⚡ {displaySpeed}</span>
+          <span>⚡ {displaySpeed}</span>
         )}
         {currentTask.status === 'generating_thumbnails' && (
           <span>📸 3 thumbnails</span>
@@ -105,7 +105,7 @@ export default function StatusCard({ currentTask, state, ram }) {
       </div>
 
       {currentTask.error && (
-        <div style={{ marginTop: '8px', fontSize: '0.7rem', color: 'var(--accent-red)' }}>
+        <div className="error-text">
           ⚠️ {currentTask.error}
         </div>
       )}

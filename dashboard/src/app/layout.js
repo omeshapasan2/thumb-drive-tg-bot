@@ -3,19 +3,25 @@ import './globals.css';
 export const metadata = {
   title: 'Video Thumbnail Bot — Dashboard',
   description: 'Real-time monitoring dashboard for the Video Thumbnail Generator Telegram Bot. Track downloads, thumbnail generation, and uploads.',
-  viewport: 'width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no',
-  themeColor: '#0f0f1a',
+};
+
+export const viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+  themeColor: '#0f1114',
 };
 
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <head>
-        {/* Google Fonts: Inter + JetBrains Mono */}
+        {/* Google Fonts: Outfit (display) + DM Sans (body) + JetBrains Mono (mono) */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link
-          href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap"
+          href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=JetBrains+Mono:wght@400;700&family=Outfit:wght@200;800&display=swap"
           rel="stylesheet"
         />
         {/* Telegram Web App SDK */}

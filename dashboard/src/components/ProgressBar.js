@@ -1,8 +1,8 @@
 'use client';
 
 /**
- * ProgressBar — overall progress showing X of Y videos completed.
- * Features animated gradient bar and stat grid.
+ * ProgressBar — overall progress showing X/Y completed.
+ * Single large stat number + bar, no three-card grid.
  */
 export default function ProgressBar({
   processedCount = 0,
@@ -20,30 +20,25 @@ export default function ProgressBar({
         {isActive && (
           <span className="card__badge" style={{
             background: state === 'paused_ram'
-              ? 'rgba(245, 158, 11, 0.15)'
-              : 'rgba(108, 123, 255, 0.15)',
+              ? 'hsl(38, 92%, 50%, 0.12)'
+              : 'hsl(173, 80%, 40%, 0.12)',
             color: state === 'paused_ram'
-              ? 'var(--accent-amber)'
-              : 'var(--accent-blue)',
+              ? 'var(--c-accent-500)'
+              : 'var(--c-dominant-400)',
           }}>
-            {state === 'paused_ram' ? '⏸ Paused (RAM)' : state === 'processing' ? '▶ Active' : state}
+            {state === 'paused_ram' ? '⏸ Paused' : state === 'processing' ? '▶ Active' : state}
           </span>
         )}
       </div>
 
-      <div className="overall-stats">
-        <div className="overall-stat">
-          <div className="overall-stat__value" id="stat-completed">{processedCount}</div>
-          <div className="overall-stat__label">Completed</div>
-        </div>
-        <div className="overall-stat">
-          <div className="overall-stat__value" id="stat-remaining">{remaining}</div>
-          <div className="overall-stat__label">Remaining</div>
-        </div>
-        <div className="overall-stat">
-          <div className="overall-stat__value" id="stat-total">{totalVideos}</div>
-          <div className="overall-stat__label">Total</div>
-        </div>
+      {/* Single stat line: big number / total */}
+      <div className="overall-stat-line">
+        <span className="overall-stat-line__big" id="stat-completed">{processedCount}</span>
+        <span className="overall-stat-line__sep">/</span>
+        <span className="overall-stat-line__total" id="stat-total">{totalVideos}</span>
+        <span className="overall-stat-line__label">
+          {isActive ? `${remaining} remaining` : 'videos'}
+        </span>
       </div>
 
       <div className="progress">

@@ -25,7 +25,7 @@ export default function RamMonitor({ ram }) {
   }[status] || '🟢';
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--sp-1)' }}>
       <div className="ram-monitor" id="ram-monitor">
         <div className="ram-monitor__icon">{emoji}</div>
         <div className="ram-monitor__info">
@@ -43,9 +43,9 @@ export default function RamMonitor({ ram }) {
       </div>
 
       {ram.net && (
-        <div className="ram-monitor" style={{ display: 'flex', justifyContent: 'space-around', fontSize: '0.85rem', padding: '8px 16px' }}>
-          <span>📥 Down: <strong style={{ color: 'var(--accent-blue)' }}>{ram.net.download_speed}</strong></span>
-          <span>📤 Up: <strong style={{ color: 'var(--accent-blue)' }}>{ram.net.upload_speed}</strong></span>
+        <div className="net-speed">
+          <span>📥 Down: <strong>{ram.net.download_speed}</strong></span>
+          <span>📤 Up: <strong>{ram.net.upload_speed}</strong></span>
         </div>
       )}
     </div>

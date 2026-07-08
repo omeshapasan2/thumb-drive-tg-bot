@@ -17,8 +17,8 @@ export default function DashboardPage() {
       tg.ready();
       tg.expand();
       // Apply Telegram theme
-      tg.setHeaderColor('#0f0f1a');
-      tg.setBackgroundColor('#0f0f1a');
+      tg.setHeaderColor('#0f1114');
+      tg.setBackgroundColor('#0f1114');
     }
   }, []);
 
@@ -36,10 +36,12 @@ export default function DashboardPage() {
 
   return (
     <main className="dashboard" id="dashboard-root">
-      {/* Header */}
+      {/* Header — left-aligned */}
       <header className="header" id="dashboard-header">
-        <h1 className="header__title">Video Thumbnail Bot</h1>
-        <p className="header__subtitle">Processing Dashboard</p>
+        <div>
+          <h1 className="header__title">Thumb Drive</h1>
+          <p className="header__subtitle">Processing Dashboard</p>
+        </div>
         <div className={connectionBadgeClass}>
           <span className="connection-dot" />
           {connectionLabel}

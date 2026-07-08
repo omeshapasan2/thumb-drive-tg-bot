@@ -34,8 +34,8 @@ export default function QueueList({ pending = [], completed = [] }) {
           <div className="card__header">
             <span className="card__title">Pending ({pending.length})</span>
             <span className="card__badge" style={{
-              background: 'rgba(108, 123, 255, 0.15)',
-              color: 'var(--accent-blue)',
+              background: 'hsl(173, 80%, 40%, 0.12)',
+              color: 'var(--c-dominant-400)',
             }}>
               Waiting
             </span>
@@ -67,11 +67,11 @@ export default function QueueList({ pending = [], completed = [] }) {
       {/* Completed Videos */}
       {hasCompleted && (
         <>
-          <div className="card__header" style={{ marginTop: hasPending ? '20px' : '0' }}>
+          <div className="card__header" style={{ marginTop: hasPending ? 'var(--sp-3)' : '0' }}>
             <span className="card__title">Completed ({completed.length})</span>
             <span className="card__badge" style={{
-              background: 'rgba(34, 197, 94, 0.15)',
-              color: 'var(--accent-green)',
+              background: 'hsl(152, 69%, 40%, 0.12)',
+              color: 'var(--c-success)',
             }}>
               Done
             </span>
@@ -83,11 +83,11 @@ export default function QueueList({ pending = [], completed = [] }) {
                 className="queue-item"
                 style={{
                   animationDelay: `${index * 0.05}s`,
-                  opacity: 0.7,
+                  opacity: 0.65,
                 }}
               >
                 <div className="queue-item__number" style={{
-                  color: task.status === 'completed' ? 'var(--accent-green)' : 'var(--accent-red)',
+                  color: task.status === 'completed' ? 'var(--c-success)' : 'var(--c-error)',
                 }}>
                   {task.status === 'completed' ? '✓' : '✗'}
                 </div>
@@ -97,7 +97,7 @@ export default function QueueList({ pending = [], completed = [] }) {
                   </div>
                   <div className="queue-item__size">
                     {task.file_size_human || formatSize(task.file_size)}
-                    {task.error && ` • ${task.error}`}
+                    {task.error && ` · ${task.error}`}
                   </div>
                 </div>
                 <div className={`queue-item__status-dot queue-item__status-dot--${task.status}`} />
