@@ -55,6 +55,16 @@ async def run_subprocess(cmd: str, cwd: Optional[Path] = None) -> tuple[str, str
     )
 
 
+def natural_sort_key(filename: str) -> list[int | str]:
+    """
+    Split filename into text and integer parts for natural (human/alphanumeric) sorting.
+    e.g., '1 - Example Name.mp4' -> [1, ' - example name.mp4']
+          'series-name-2.mp4' -> ['series-name-', 2, '.mp4']
+          '[EP-01] Example Name.mp4' -> ['[ep-', 1, '] example name.mp4']
+    """
+    return [int(text) if text.isdigit() else text.lower() for text in re.split(r'(\d+)', filename)]
+
+
 async def list_remote_files(remote: str, path: str) -> list[dict]:
     """
     List video files in the specified rclone remote path.
@@ -88,8 +98,8 @@ async def list_remote_files(remote: str, path: str) -> list[dict]:
                 "path": f"{path}/{name}".replace("//", "/"),
             })
 
-    # Sort by file size ascending (smallest first -> largest last)
-    video_files.sort(key=lambda x: x["size"])
+    # Sort by natural filename order (e.g., 1 -> 2 -> 10, EP-01 -> EP-02)
+    video_files.sort(key=lambda x: natural_sort_key(x["name"]))
     return video_files
 
 
