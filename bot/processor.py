@@ -302,6 +302,18 @@ async def upload_to_telegram(
         dest_chat = int(Config.CHANNEL_ID) if Config.CHANNEL_ID.lstrip("-").isdigit() else Config.CHANNEL_ID
         logger.info("Uploading to target channel: %s", dest_chat)
 
+        # Pyrogram (MTProto) must resolve the channel peer before sending.
+        # Unlike the HTTP Bot API, MTProto doesn't auto-resolve numeric IDs.
+        try:
+            chat_info = await bot_client.get_chat(dest_chat)
+            logger.info("Resolved channel: %s (ID: %s)", chat_info.title, chat_info.id)
+        except Exception as e:
+            logger.error("Failed to resolve channel %s: %s", dest_chat, e)
+            raise RuntimeError(
+                f"Cannot access channel {dest_chat}. "
+                f"Make sure the bot is added as an admin: {e}"
+            )
+
     # Generate a small thumbnail for the video message itself
     video_thumb = Config.THUMBNAIL_DIR / f"{video_path.stem}_video_thumb.jpg"
     cmd = (
